@@ -1,19 +1,16 @@
 
 package com.example.instructions.service;
 
-import com.example.instructions.model.CanonicalTrade;
-import com.example.instructions.util.TradeTransformer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-
 import java.nio.charset.StandardCharsets;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class TradeServiceTest {
@@ -50,4 +47,17 @@ class TradeServiceTest {
         assertEquals("File processed successfully!", result);
         verify(publisher, times(1)).send(anyString());
     }
+
+    @Test
+    void testUnsupportedFileType() {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "trades.txt", "text/plain", "invalid content".getBytes());
+
+        Exception exception = org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            tradeService.processFile(file);
+        });
+
+        assertTrue(exception.getMessage().startsWith("Failed to process file"));
+    }
+
 }
